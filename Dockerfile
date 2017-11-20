@@ -2,13 +2,19 @@ FROM ubuntu:16.04
 MAINTAINER ljz@xiaogu-tech.com
 
 RUN apt-get update \
-    && apt-get install -y python3 python3-pip
+    && apt-get install -y nginx git postgresql postgresql-contrib python3 python3-pip ssh vim tzdata \
+    && apt-get clean
+
+RUN locale-gen en_US en_US.UTF-8
 ENV LC_ALL="en_US.UTF-8"
+RUN echo America/Los_Angeles | tee /etc/timezone && dpkg-reconfigure --frontend noninteractive tzdata
+
 RUN ln -s /usr/bin/python3 /usr/bin/python
 RUN ln -s /usr/bin/pip3 /usr/bin/pip
 RUN pip install --upgrade pip
 RUN pip install requests
 
+RUN mkdir -p /simulator
 COPY ./ /simulator
 WORKDIR /simulator
 
