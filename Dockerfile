@@ -8,8 +8,10 @@ ENV LC_ALL="en_US.UTF-8"
 RUN ln -s /usr/bin/python3 /usr/bin/python
 RUN ln -s /usr/bin/pip3 /usr/bin/pip
 RUN pip install --upgrade pip
-
 RUN pip install requests
+
+COPY ./ /simulator
+WORKDIR /simulator
 
 ENV RTA_URL=${RTA_URL}
 ENV RTA_FILE=${RTA_FILE}
