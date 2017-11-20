@@ -14,11 +14,6 @@ RUN ln -s /usr/bin/pip3 /usr/bin/pip
 RUN pip install --upgrade pip
 RUN pip install requests
 
-RUN mkdir -p /simulator
-COPY ./ /simulator
-WORKDIR /simulator
-
-
 ARG RTA_URL
 ENV RTA_URL=${RTA_URL}
 ARG RTA_FILE
@@ -33,6 +28,10 @@ ARG RTA_FIELD_KEYS
 ENV RTA_FIELD_KEYS=${RTA_FIELD_KEYS}
 ARG RTA_FIELD_VALUES
 ENV RTA_FIELD_VALUES=${RTA_FIELD_VALUES}
+
+RUN mkdir -p /simulator
+COPY ./ /simulator
+WORKDIR /simulator
 
 EXPOSE 6666
 ENTRYPOINT ["python", "main.py"]
