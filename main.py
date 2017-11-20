@@ -86,6 +86,8 @@ class Simulator:
                     response = requests.post(upload_url, data=text.encode('utf-8'))
                     log(str(response) + time.strftime("%Y-%m-%d %H:%M:%S", time.localtime()) + '\n')
                     time.sleep(self.config.interval)
+                    count = 0
+                    text = ''
                 else:
                     count += 1
                     text += line
