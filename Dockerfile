@@ -2,7 +2,7 @@ FROM ubuntu:16.04
 MAINTAINER ljz@xiaogu-tech.com
 
 RUN apt-get update \
-    && apt-get install -y nginx git postgresql postgresql-contrib python3 python3-pip ssh vim tzdata \
+    && apt-get install -y nginx git postgresql postgresql-contrib python3 python3-pip ssh vim tzdata zip\
     && apt-get clean
 
 RUN locale-gen en_US en_US.UTF-8
@@ -33,5 +33,7 @@ RUN mkdir -p /simulator
 COPY ./ /simulator
 WORKDIR /simulator
 
+RUN pwd
+RUN ls -l
 EXPOSE 6666
 ENTRYPOINT ["python", "main.py"]
