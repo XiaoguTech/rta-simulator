@@ -32,12 +32,12 @@ class Config:
 
         self.hosts = get_env('RTA_INFLUX_HOST', 'https://twinpines-9429794e.influxcloud.net:8086')
         self.database = get_env('RTA_DATABASE', 'test')
-        self.measurement = get_env('RTA_MEASUREMENT', 'house')
+        self.measurement = get_env('RTA_MEASUREMENT', 'test')
         self.username = get_env('RTA_USERNAME', 'xiaogu')
         self.password = get_env('RTA_PASSWORD', '123q456w')
 
-        self.retention_policy_name = get_env('RTA_RETENTION_POLICY_NAME', 'default_one_day one_week one_month').split(' ')
-        self.retention_policy = get_env('RTA_RETENTION_POLICY', '1d 1w 1m').split(' ')
+        self.retention_policy_name = get_env('RTA_RETENTION_POLICY_NAME', 'default_one_day one_week eight_weeks').split(' ')
+        self.retention_policy = get_env('RTA_RETENTION_POLICY', '1d 1w 8w').split(' ')
         self.continuous_query_name = 'cq_5m cq_5h'.split(' ')
         self.continuous_query = '5m 5h'.split(' ')
 
@@ -104,7 +104,8 @@ class Simulator:
         retention_create_format = 'CREATE RETENTION POLICY {} ON ' + self.config.database + ' DURATION {} REPLICATION 1'
         for index, retention in enumerate( list(zip(self.config.retention_policy_name, self.config.retention_policy)) ):
             url = base_url + retention_create_format.format(retention[0], retention[1]) + (' default' if index==0 else '')
-            log(str(requests.post(url).json))
+            log(url+'\n')
+            log(str(requests.post(url).json()) + '\n')
 
         continuous_create_format = 'create continuous query {cq_name} on %s begin select mean("Voltage") as "mean_voltage" into {retention}.%s from {last_retention}.%s group by time({cq_time}), * end' % (self.config.database, self.config.measurement, self.config.measurement)
         for index in range(len(self.config.continuous_query)):
@@ -113,7 +114,7 @@ class Simulator:
             retention = self.config.retention_policy_name[index+1]
             last_retention = self.config.retention_policy_name[index]
             url = base_url + continuous_create_format.format(cq_name=cq_name, retention=retention, last_retention=last_retention, cq_time=cq_time)
-            log(str(requests.post(url).json))
+            log(str(requests.post(url).json()) + '\n')
 
 class Director:
     @staticmethod
