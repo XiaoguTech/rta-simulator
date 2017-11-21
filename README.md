@@ -7,9 +7,9 @@ tag_keys=metric place
 ```
 
 * tag_values:
-会生成两行influxdb数据，逗号分割
+会生成两行influxdb数据，split_symbol分割，默认分号
 ```
-tag_values=voltage xx,global xx
+tag_values=voltage xx;global xx
 ```
 
 * field_keys:
@@ -17,9 +17,15 @@ tag_values=voltage xx,global xx
 field_keys=Voltage Global
 ```
 
-* field_values:
+* field_values,$1代表第1列（无第0列），#10.0代表立即数， 同一行的数据用空格分割，不同行的数据用`split_symbol`分割，保证行数与tag_values对应，每行数据数与field_keys对应
 ```
-field_values=$1 $3
+field_values=$1 $3;$4 $6;#10 #11
 ```
 
+* src 为待替换的字符，一组字符使用空格分割
+* dest 为替换的目标字符
+* fromline 为从第几行开始读，2为第二行开始，没有第0行。
 Global_active_power;Global_reactive_power;Voltage;Global_intensity;Sub_metering_1;Sub_metering_2;Sub_metering_3
+
+* 还没做的
+1. 区分field values
