@@ -17,6 +17,7 @@ tag_values=voltage xx;global xx
 field_keys=Voltage Global
 ```
 
+
 * field_values,$1代表第1列（无第0列），#10.0代表立即数， 同一行的数据用空格分割，不同行的数据用`split_symbol`分割，保证行数与tag_values对应，每行数据数与field_keys对应
 ```
 field_values=$1 $3;$4 $6;#10 #11
@@ -26,6 +27,12 @@ field_values=$1 $3;$4 $6;#10 #11
 * dest 为替换的目标字符
 * fromline 为从第几行开始读，2为第二行开始，没有第0行。
 Global_active_power;Global_reactive_power;Voltage;Global_intensity;Sub_metering_1;Sub_metering_2;Sub_metering_3
+
+### downsampling的相关设置
+* retention policy name: 空格分隔，第一项为默认存储策略，第二项为一级归档
+* retention policy : 与名字一一对应，空格分割，为时长，如1周为1w
+* continuous query name: 空格分割，与retention policy一一对应，
+* continuous query interval: 查询间隔。
 
 * 还没做的
 1. 区分field values

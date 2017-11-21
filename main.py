@@ -31,10 +31,15 @@ class Config:
         self.interval = int(get_env('RTA_INTERVAL', '10'))
 
         self.hosts = get_env('RTA_INFLUX_HOST', 'https://twinpines-9429794e.influxcloud.net:8086')
-        self.database = get_env('RTA_DATABASE', 'house')
+        self.database = get_env('RTA_DATABASE', 'test')
         self.measurement = get_env('RTA_MEASUREMENT', 'house')
         self.username = get_env('RTA_USERNAME', 'xiaogu')
         self.password = get_env('RTA_PASSWORD', '123q456w')
+
+        self.retention_policy_name = get_env('RTA_RETENTION_POLICY_NAME', 'default_one_day one_week one_month').split(' ')
+        self.retention_policy = get_env('RTA_RETENTION_POLICY', '1d 1w 1m').split(' ')
+        self.continuous_query_name = 'cq_5m cq_5h'.split(' ')
+        self.continuous_query = '5m 5h'.split(' ')
 
 class Simulator:
     def __init__(self, config):
@@ -67,6 +72,7 @@ class Simulator:
                 
                 for line in reader:
                     values = line.split(self.config.split_symbol)
+                    # -------------------------------------
                     # diff the immediate num and x'th column
                     fields = reduce(lambda x, y: x+'%s=%s,' % (y[0], values[int(y[1])-1]), list(zip(self.config.field_keys, self.config.field_values_pos)), '')[:-1]
                     
@@ -77,10 +83,8 @@ class Simulator:
                         writer.write(line_data)
 
     def upload(self):
-        if self.config.username == '':
-            upload_url = '%s/write?db=%s' % (self.config.hosts, self.config.database)            
-        else:
-            upload_url = '%s/write?db=%s&u=%s&p=%s' % (self.config.hosts, self.config.database, self.config.username, self.config.password)
+        upload_url = '%s/write?db=%s&u=%s&p=%s' % (self.config.hosts, self.config.database, self.config.username, self.config.password)
+        
         with open(self.config.result_file) as reader:
             count = 0
             text = ''
@@ -94,15 +98,31 @@ class Simulator:
                 else:
                     count += 1
                     text += line 
-                                
+        
+    def down_sample_config(self):
+        base_url = '%s/query?db=%s&u=%s&p=%s&q=' % (self.config.hosts, self.config.database, self.config.username, self.config.password)
+        retention_create_format = 'CREATE RETENTION POLICY {} ON ' + self.config.database + ' DURATION {} REPLICATION 1'
+        for index, retention in enumerate( list(zip(self.config.retention_policy_name, self.config.retention_policy)) ):
+            url = base_url + retention_create_format.format(retention[0], retention[1]) + (' default' if index==0 else '')
+            log(str(requests.post(url).json))
+
+        continuous_create_format = 'create continuous query {cq_name} on %s begin select mean("Voltage") as "mean_voltage" into {retention}.%s from {last_retention}.%s group by time({cq_time}), * end' % (self.config.database, self.config.measurement, self.config.measurement)
+        for index in range(len(self.config.continuous_query)):
+            cq_name = self.config.continuous_query_name[index]
+            cq_time = self.config.continuous_query[index]
+            retention = self.config.retention_policy_name[index+1]
+            last_retention = self.config.retention_policy_name[index]
+            url = base_url + continuous_create_format.format(cq_name=cq_name, retention=retention, last_retention=last_retention, cq_time=cq_time)
+            log(str(requests.post(url).json))
 
 class Director:
     @staticmethod
     def Start(simulator):
-        simulator.download()
-        simulator.unzip()
-        simulator.process()
-        simulator.upload()
+        #simulator.download()
+        #simulator.unzip()
+        #simulator.process()
+        simulator.down_sample_config()
+        #simulator.upload()
 
 def get_env(key, default=None):
     env = os.getenv(key)
