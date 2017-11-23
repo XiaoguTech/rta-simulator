@@ -119,11 +119,11 @@ class Simulator:
 class Director:
     @staticmethod
     def Start(simulator):
-        #simulator.download()
-        #simulator.unzip()
-        #simulator.process()
+        simulator.download()
+        simulator.unzip()
+        simulator.process()
         simulator.down_sample_config()
-        #simulator.upload()
+        simulator.upload()
 
 def get_env(key, default=None):
     env = os.getenv(key)

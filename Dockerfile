@@ -2,7 +2,7 @@ FROM ubuntu:16.04
 MAINTAINER ljz@xiaogu-tech.com
 
 RUN apt-get update \
-    && apt-get install -y nginx git postgresql postgresql-contrib python3 python3-pip ssh vim tzdata zip\
+    && apt-get install -y nginx git postgresql postgresql-contrib python3 python3-pip python-pip ssh vim tzdata zip\
     && apt-get clean
 
 RUN locale-gen en_US en_US.UTF-8
@@ -13,6 +13,10 @@ RUN ln -s /usr/bin/python3 /usr/bin/python
 RUN ln -s /usr/bin/pip3 /usr/bin/pip
 RUN pip install --upgrade pip
 RUN pip install requests
+
+# install protoc buffer and scipy, six
+RUN python2 -m pip install scipy six
+
 
 ARG RTA_URL
 ENV RTA_URL=${RTA_URL}
