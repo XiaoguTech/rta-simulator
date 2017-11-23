@@ -14,10 +14,6 @@ RUN ln -s /usr/bin/pip3 /usr/bin/pip
 RUN pip install --upgrade pip
 RUN pip install requests
 
-# install protoc buffer and scipy, six
-RUN python2 -m pip install scipy six
-
-
 ARG RTA_URL
 ENV RTA_URL=${RTA_URL}
 ARG RTA_FILE
