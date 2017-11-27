@@ -19,7 +19,7 @@ class Config:
         self.tag_keys = get_env('RTA_TAG_KEYS', 'metric').split(' ')
         self.tag_values = get_env('RTA_TAG_VALUES', 'ljz').split(self.split_symbol)
         self.field_keys = get_env('RTA_FIELD_KEYS', 'Global_active_power;Global_reactive_power;Voltage;Global_intensity;Sub_metering_1;Sub_metering_2;Sub_metering_3').split(self.split_symbol)
-        self.field_values = get_env('RTA_FIELD_VALUES', '$3 $4 $5 $6 $7 $8 $9').split(self.split_symbol)
+        self.field_values = get_env('RTA_FIELD_VALUES', '$3 $4 $5 $6 $7 $8 $9').split(' ')
         
         self.field_values_pos = [res[1:] for res in self.field_values]
         self.replace_src = get_env('RTA_REPLACE_SRC', '?')
@@ -78,7 +78,7 @@ class Simulator:
                     
                     # every series is a tag
                     for tag in tags:
-                        line_data = protocol_format.format(tags=tag[:-1], fields=fields).replace(self.config.src, self.config.dest)
+                        line_data = protocol_format.format(tags=tag[:-1], fields=fields).replace(self.config.replace_src, self.config.replace_dest)
                         log(line_data)
                         writer.write(line_data)
 
