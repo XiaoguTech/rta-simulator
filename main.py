@@ -21,7 +21,7 @@ class Config:
         self.field_keys = get_env('RTA_FIELD_KEYS', 'Global_active_power;Global_reactive_power;Voltage;Global_intensity;Sub_metering_1;Sub_metering_2;Sub_metering_3').split(self.split_symbol)
         self.field_values = get_env('RTA_FIELD_VALUES', '$3 $4 $5 $6 $7 $8 $9').split(self.split_symbol)
         
-        # self.field_values_pos = [res[1:] for res in field_values.split(' ')]
+        self.field_values_pos = [res[1:] for res in self.field_values]
         self.replace_src = get_env('RTA_REPLACE_SRC', '?')
         self.replace_dest = get_env('RTA_REPLACE_DEST', '0.000')
         self.fromline = int(get_env('RTA_FROMLINE', '2')) - 1
