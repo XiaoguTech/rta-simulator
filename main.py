@@ -30,11 +30,11 @@ class Config:
         self.start_time = get_env('RTA_START_TIME')
         self.interval = int(get_env('RTA_INTERVAL', '10'))
 
-        self.hosts = get_env('RTA_INFLUX_HOST', 'https://twinpines-9429794e.influxcloud.net:8086')
-        self.database = get_env('RTA_DATABASE', 'test')
-        self.measurement = get_env('RTA_MEASUREMENT', 'test')
-        self.username = get_env('RTA_USERNAME', 'xiaogu')
-        self.password = get_env('RTA_PASSWORD', '123q456w')
+        self.hosts = get_env('RTA_INFLUX_HOST', 'http://123.206.82.207:8086')
+        self.database = get_env('RTA_DATABASE', 'UCIlab')
+        self.measurement = get_env('RTA_MEASUREMENT', 'house_power')
+        self.username = get_env('RTA_USERNAME', 'test')
+        self.password = get_env('RTA_PASSWORD', 'test')
 
         self.retention_policy_name = get_env('RTA_RETENTION_POLICY_NAME', 'default_one_day one_week eight_weeks').split(' ')
         self.retention_policy = get_env('RTA_RETENTION_POLICY', '1d 1w 8w').split(' ')
@@ -91,6 +91,9 @@ class Simulator:
             for line in reader:
                 if count == self.config.batch_size:
                     response = requests.post(upload_url, data=text.encode('utf-8'))
+                    if response.status_code == 404:
+                        requests.post('%s/query?u=%s&p=%s&q=create database %s' % (self.config.hosts, self.config.username, self.config.password, self.config.database))
+                        response = requests.post(upload_url, data=text.encode('utf-8'))
                     log(str(response) + time.strftime("%Y-%m-%d %H:%M:%S", time.localtime()) + '\n')
                     time.sleep(self.config.interval)
                     count = 0
