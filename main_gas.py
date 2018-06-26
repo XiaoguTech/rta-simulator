@@ -21,8 +21,8 @@ class Config:
 
         self.tag_keys = get_env('RTA_TAG_KEYS', 'metric').split(' ')
         self.tag_values = get_env('RTA_TAG_VALUES', 'ljz').split(self.split_symbol)
-        self.field_keys = get_env('RTA_FIELD_KEYS', 'Temp;Humidity;R0;R1;R2;R3;R4;R5;R6;R7;R8;Class').split(self.split_symbol)
-        self.field_values = get_env('RTA_FIELD_VALUES', '$3 $4 $5 $6 $7 $8 $9 $10 $11 $12').split(' ')
+        self.field_keys = get_env('RTA_FIELD_KEYS', 'R1;R2;R3;R4;R5;R6;R7;R8;Temp;Humidity;Class').split(self.split_symbol)
+        self.field_values = get_env('RTA_FIELD_VALUES', '$3 $4 $5 $6 $7 $8 $9 $10 $11 $12 $13').split(' ')
 
         self.field_values_pos = [res[1:] for res in self.field_values]
         self.replace_src = get_env('RTA_REPLACE_SRC', '?')
@@ -57,8 +57,8 @@ class Simulator:
         suffix = file_name.split('.')
         if suffix[-1] == 'zip':
             os.system("unzip -o " + file_name)
-            os.system("unzip -o " + dataset_filename)
-            os.system("rm -rf " + useless_filename)
+            os.system("unzip -o " + self.config.dataset_filename)
+            os.system("rm -rf " + self.config.useless_filename)
         else:
             pass
 
@@ -67,15 +67,38 @@ class Simulator:
     		for file_name in files:
     			# print(file_name)
     			if file_name == 'HT_Sensor_metadata.dat':
-    				print(file_name)
-    				metadata = np.loadtxt(file_name, skiprows=1, dtype=str)
-    				print(metadata)
+    				# print(file_name)
+    				metadata = np.loadtxt(file_name, skiprows=1, dtype=bytes).astype(str)
+    				# print(metadata)
+    				metadata[ metadata[:,2] == 'background', 2 ] = 0
+    				metadata[ metadata[:,2] == 'wine', 2 ] = 1
+    				metadata[ metadata[:,2] == 'banana', 2 ] = 2
+    				# print(metadata)
+    				metadata = np.array( metadata[:,[0,2]], dtype=float)
+    				# print(metadata)
     			elif file_name == 'HT_Sensor_dataset.dat':
-    				print(file_name)
+    				# print(file_name)
     				dataset = np.loadtxt(file_name, skiprows=1)
-    				print(dataset)
+    				# print(dataset)
     			else:
     				pass
+    	data_i0 = dataset[dataset[:,0]==0]
+    	label_0 = np.ones(data_i0.shape[0])*metadata[ metadata[:,0] == 0, 1]
+    	data_0 = np.c_[data_i0,label_0]
+    	print(data_0)
+    	time.sleep(self.config.interval)
+    	for i in metadata[:,0]:
+    		data_ii = dataset[dataset[:,0]==(i+1)]
+    		label_i = np.ones(data_ii.shape[0])*metadata[ metadata[:,0] == (i+1), 1]
+    		# print(label_i)
+    		# time.sleep(self.config.interval)
+    		data_i = np.c_[data_ii,label_i]
+    		data_0 = np.row_stack((data_0, data_i))
+    		print(data_0)
+    		# time.sleep(self.config.interval)
+    		time.sleep(2)
+    	np.savetxt(self.config.download_file, data_0, fmt=['%s']*(data_0.shape[1]), newline='\n')    	
+    	
 
     def process(self):
         protocol_format = "%s,{tags} {fields}\n" % self.config.measurement
@@ -84,29 +107,20 @@ class Simulator:
         for tag_value in self.config.tag_values:
             tag_values = tag_value.split(' ')
             tags.append( reduce(lambda x, y: x+'%s=%s,' % (y[0], y[1]), list(zip(self.config.tag_keys, tag_values)), '') )
-
+        # write db static file
         with open(self.config.result_file, 'w') as writer:
             with open(self.config.download_file) as reader:
-                for i in range(self.config.fromline):
-                    reader.readline()
-
+                # for i in range(self.config.fromline):
+                #     print(reader.readline())
                 for i, line in enumerate(reader, 1):
-                    values = line.split(self.config.split_symbol)
-                    # -------------------------------------
-                    # diff the immediate num and x'th column
+                    values = line.split(' ')
                     fields = reduce(lambda x, y: x+'%s=%s,' % (y[0], values[int(y[1])-1]), list(zip(self.config.field_keys, self.config.field_values_pos)), '')[:-1]
-                    # print(values)
-                    _vs = {key: float(values[i+2]) if values[i+2] not in ["?", "\n"] else 0. for i, key in enumerate(self.config.field_keys)}
-                    # print(_vs)
-                    fields = fields.strip() + ",%s=%s" % ("Active_energy_consumed", _vs["Global_active_power"] * 1000 / 60 - _vs["Sub_metering_1"] - _vs["Sub_metering_2"] - _vs["Sub_metering_3"])
-
-                    # every series is a tag
                     for tag in tags:
                         line_data = protocol_format.format(tags=tag[:-1], fields=fields).replace(self.config.replace_src, self.config.replace_dest)
-                        # log(line_data)
+                    #     log(line_data)
+                    #     break
+                    # break
                         writer.write(line_data)
-
-                    if i % 10000 == 0 : print("%s / 2075260 lines processed" % i) 
 
     def upload(self):
         upload_url = '%s/write?db=%s&u=%s&p=%s' % (self.config.hosts, self.config.database, self.config.username, self.config.password)
@@ -148,12 +162,12 @@ class Simulator:
 class Director:
     @staticmethod
     def Start(simulator):
-        # simulator.download()
-        # simulator.unzip()
+        simulator.download()
+        simulator.unzip()
         simulator.preprocess()
-        # simulator.process()
+        simulator.process()
         #simulator.down_sample_config()
-        # simulator.upload()
+        simulator.upload()
 
 def get_env(key, default=None):
     env = os.getenv(key)
