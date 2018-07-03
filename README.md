@@ -1,3 +1,13 @@
+# 数据集说明
+## house hold power
+[数据集地址](http://archive.ics.uci.edu/ml/datasets/Individual%20household%20electric%20power%20consumption)
+
+## gas sensor
+[数据集地址](http://archive.ics.uci.edu/ml/datasets/Gas+sensors+for+home+activity+monitoring)
+
+## nasa algae
+[数据集地址](https://ti.arc.nasa.gov/tech/dash/groups/pcoe/prognostic-data-repository/)
+
 # 配置文件说明
 
 * tag_keys:
@@ -16,7 +26,6 @@ tag_values=voltage xx;global xx
 ```
 field_keys=Voltage Global
 ```
-
 
 * field_values,$1代表第1列（无第0列），#10.0代表立即数， 同一行的数据用空格分割，不同行的数据用`split_symbol`分割，保证行数与tag_values对应，每行数据数与field_keys对应
 ```
