@@ -1,12 +1,17 @@
 # 数据集说明
-## house hold power
+## uci
+### house hold power
 [数据集地址](http://archive.ics.uci.edu/ml/datasets/Individual%20household%20electric%20power%20consumption)
 
-## gas sensor
+### gas sensor
 [数据集地址](http://archive.ics.uci.edu/ml/datasets/Gas+sensors+for+home+activity+monitoring)
 
-## nasa algae
-[数据集地址](https://ti.arc.nasa.gov/tech/dash/groups/pcoe/prognostic-data-repository/)
+## nasa
+### nasa algae
+[数据集地址](https://ti.arc.nasa.gov/dev/tech/dash/groups/pcoe/prognostic-data-repository/publications/#algae)
+
+### nasa battery aging
+[数据集地址](https://ti.arc.nasa.gov/dev/tech/dash/groups/pcoe/prognostic-data-repository/publications/#battery)
 
 # 配置文件说明
 
