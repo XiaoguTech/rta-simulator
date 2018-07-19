@@ -3,6 +3,7 @@
 ├── Dockerfile
 ├── grafana # import grafana dashboard which is using influxdb datasources
 ├── influxdb # influxdb inserting scripts
+├── iot # raspbeery pi 3 sending iot module data related scripts
 ├── kapacitor_udf
 ├── LICENSE
 ├── main.py # influxdb inserting scripts demo

@@ -36,7 +36,7 @@ def loop():
 			print('Current temp:{} C, status_code:{}'.format('%0.3f'%temp, status_code))
 
 def upload(temp):
-	host_name = 'http://192.168.1.135:8086'
+	host_name = 'http://192.168.1.108:8086'# target host name
 	db_name = 'xiaogu'
 	user_name = 'test'
 	user_passwd = 'test'
